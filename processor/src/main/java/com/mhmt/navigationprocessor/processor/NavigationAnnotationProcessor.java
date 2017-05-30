@@ -33,6 +33,8 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
         classVariableMap.get(clazz).add(rootElement);
       }
     }
+
+    // Add package and imports
     StringBuilder builder = new StringBuilder()
                                 .append("package com.mhmt.navigationprocessor.generated;\n")
                                 .append("import android.content.Context;\n")
@@ -41,12 +43,12 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     for (Element clazz : classVariableMap.keySet()) {
       builder.append("import com.mhmt.navigationprocessor.")
              .append(clazz.getSimpleName())
-             .append(";\n");
+             .append(";\n\n");
     }
 
     builder.append("public class Navigator {\n\n"); // open class
 
-    for (Element clazz : classVariableMap.keySet()) {
+    for (Element clazz : classVariableMap.keySet()) { //add a start method for each activity
       builder.append("\tpublic static void start").append(clazz.getSimpleName().toString()).append("(final Context context");
 
       StringBuilder intentBuilder = new StringBuilder();
@@ -65,6 +67,23 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
              .append("\t}\n\n"); //close method
     }
 
+    for (Element clazz: classVariableMap.keySet()) {
+      builder.append("\t public static void bind(final ")
+             .append(clazz.getSimpleName())
+             .append(" activity) {\n"); // open method
+
+      for (Element field : classVariableMap.get(clazz)) {
+        if (field.getAnnotation(Required.class).bind()) {
+          builder.append("\t\t")
+                 .append("activity").append(".").append(field.getSimpleName())
+                 .append(" = ")
+                 .append("activity.getIntent().get").append(getClassAsString(field)).append("Extra(")
+                 .append("\"").append(field.getSimpleName()).append("\");\n");
+        }
+      }
+
+      builder.append("\t}\n\n"); //close method
+    }
     builder.append("}\n"); // close class
 
 
@@ -85,6 +104,11 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     }
 
     return true;
+  }
+
+  private String getClassAsString(final Element field) {
+    final String[] split = field.asType().toString().split("\\.");
+    return split[split.length-1];
   }
 
 }
