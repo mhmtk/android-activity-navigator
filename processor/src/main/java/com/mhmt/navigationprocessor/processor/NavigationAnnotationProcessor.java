@@ -18,7 +18,7 @@ import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes("com.mhmt.navigationprocessor.processor.Required")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
-public class CustomAnnotationProcessor extends AbstractProcessor {
+public class NavigationAnnotationProcessor extends AbstractProcessor {
 
   @Override public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
