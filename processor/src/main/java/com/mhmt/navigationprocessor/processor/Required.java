@@ -5,5 +5,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.FIELD)
 public @interface Required {
-  boolean cast() default false;
+  boolean bind() default false;
 }

@@ -8,7 +8,7 @@ import com.mhmt.navigationprocessor.processor.Required;
 public class SecondActivity extends AppCompatActivity {
 
   @Required int intId;
-  @Required String magic;
+  @Required(bind = true) String magic;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
