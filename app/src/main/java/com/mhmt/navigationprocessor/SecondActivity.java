@@ -9,7 +9,7 @@ import com.mhmt.navigationprocessor.processor.Required;
 
 public class SecondActivity extends AppCompatActivity {
 
-  @Required public int intId;
+  @Required(bind = true) public int intId;
   @Required(bind = true) public String magic;
 
   @Override

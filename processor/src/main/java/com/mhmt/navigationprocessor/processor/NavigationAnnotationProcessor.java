@@ -74,11 +74,20 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
       for (Element field : classVariableMap.get(clazz)) {
         if (field.getAnnotation(Required.class).bind()) {
-          builder.append("\t\t")
-                 .append("activity").append(".").append(field.getSimpleName())
-                 .append(" = ")
-                 .append("activity.getIntent().get").append(getClassAsString(field)).append("Extra(")
-                 .append("\"").append(field.getSimpleName()).append("\");\n");
+          if (sameClass(field, Integer.class) || sameClass(field, int.class)) {
+            builder.append("\t\t")
+                   .append("activity").append(".").append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().get").append("Int").append("Extra(")
+                   .append("\"").append(field.getSimpleName()).append("\"")
+                   .append(", -1);\n");
+          } else {
+            builder.append("\t\t")
+                   .append("activity").append(".").append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().get").append(getClassAsString(field)).append("Extra(")
+                   .append("\"").append(field.getSimpleName()).append("\");\n");
+          }
         }
       }
 
@@ -91,8 +100,6 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     try { // write the file
       JavaFileObject
           source = processingEnv.getFiler().createSourceFile("com.mhmt.navigationprocessor.generated.Navigator");
-
-
       Writer writer = source.openWriter();
       writer.write(builder.toString());
       writer.flush();
@@ -111,4 +118,7 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     return split[split.length-1];
   }
 
+  private boolean sameClass(Element element, Class clazz) {
+    return clazz.getName().equals(element.asType().toString());
+  }
 }
