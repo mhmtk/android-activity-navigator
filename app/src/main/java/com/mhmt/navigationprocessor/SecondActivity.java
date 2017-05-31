@@ -16,7 +16,7 @@ public class SecondActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_second);
-    Log.d("Navigator", "Before bind : ".concat(magic));
+    Log.d("Navigator", "Before bind : " + magic);
     Navigator.bind(this);
     Log.d("Navigator", "After bind: ".concat(magic));
   }
