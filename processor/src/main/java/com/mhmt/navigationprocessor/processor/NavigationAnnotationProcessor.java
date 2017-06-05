@@ -74,18 +74,77 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
       for (Element field : classVariableMap.get(clazz)) {
         if (field.getAnnotation(Required.class).bind()) {
-          if (sameClass(field, Integer.class) || sameClass(field, int.class)) {
+          if (sameClass(field, Double.class) || sameClass(field, double.class)
+              || sameClass(field, Long.class)|| sameClass(field, long.class)
+              || sameClass(field, Float.class)|| sameClass(field, float.class)) {
             builder.append("\t\t")
-                   .append("activity").append(".").append(field.getSimpleName())
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
                    .append(" = ")
-                   .append("activity.getIntent().get").append("Int").append("Extra(")
-                   .append("\"").append(field.getSimpleName()).append("\"")
+                   .append("activity.getIntent().get")
+                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append("Extra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
                    .append(", -1);\n");
+          } else if (sameClass(field, Byte.class) || sameClass(field, byte.class)
+                     || sameClass(field, Short.class) || sameClass(field, short.class)) {
+            builder.append("\t\t")
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().get")
+                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append("Extra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
+                   .append(", (").append(lowerCaseFirstLetter(getClassAsString(field))).append(") -1);\n");
+          } else if (sameClass(field, char.class)) {
+            builder.append("\t\t")
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().get")
+                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append("Extra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
+                   .append(", 'm');\n");
+          } else if (sameClass(field, Integer.class) || sameClass(field, int.class)) {
+            builder.append("\t\t")
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().getIntExtra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
+                   .append(", -1);\n");
+          } else if (sameClass(field, Boolean.class) || sameClass(field, boolean.class)) {
+            builder.append("\t\t")
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().get")
+                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append("Extra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
+                   .append(", false);\n");
           } else {
             builder.append("\t\t")
                    .append("activity").append(".").append(field.getSimpleName())
                    .append(" = ")
-                   .append("activity.getIntent().get").append(getClassAsString(field)).append("Extra(")
+                   .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassAsString(field))).append("Extra(")
                    .append("\"").append(field.getSimpleName()).append("\");\n");
           }
         }
@@ -120,5 +179,13 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
   private boolean sameClass(Element element, Class clazz) {
     return clazz.getName().equals(element.asType().toString());
+  }
+
+  private String capitalizeFirstLetter(final String input) {
+    return input.substring(0, 1).toUpperCase().concat(input.substring(1));
+  }
+
+  private String lowerCaseFirstLetter(final String input) {
+    return input.substring(0, 1).toLowerCase().concat(input.substring(1));
   }
 }
