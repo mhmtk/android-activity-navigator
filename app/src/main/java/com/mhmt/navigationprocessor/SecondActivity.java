@@ -9,8 +9,9 @@ import com.mhmt.navigationprocessor.processor.Required;
 
 public class SecondActivity extends AppCompatActivity {
 
-  @Required public int[] intArray;
+  @Required(bind = true) public int[] intArray;
   @Required(bind = true) public String string;
+  @Required(bind = true) public Parcellabble parcellabble;
 
   @Required(bind = true) public int intId;
   @Required(bind = true) public Integer integer;

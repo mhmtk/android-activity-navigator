@@ -74,49 +74,49 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
       for (Element field : classVariableMap.get(clazz)) {
         if (field.getAnnotation(Required.class).bind()) {
-          if (sameClass(field, Double.class) || sameClass(field, double.class)
-              || sameClass(field, Long.class)|| sameClass(field, long.class)
-              || sameClass(field, Float.class)|| sameClass(field, float.class)) {
+          if (ofClass(field, Double.class) || ofClass(field, double.class)
+              || ofClass(field, Long.class) || ofClass(field, long.class)
+              || ofClass(field, Float.class) || ofClass(field, float.class)) {
             builder.append("\t\t")
                    .append("activity")
                    .append(".")
                    .append(field.getSimpleName())
                    .append(" = ")
                    .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
                    .append("Extra(")
                    .append("\"")
                    .append(field.getSimpleName())
                    .append("\"")
                    .append(", -1);\n");
-          } else if (sameClass(field, Byte.class) || sameClass(field, byte.class)
-                     || sameClass(field, Short.class) || sameClass(field, short.class)) {
+          } else if (ofClass(field, Byte.class) || ofClass(field, byte.class)
+                     || ofClass(field, Short.class) || ofClass(field, short.class)) {
             builder.append("\t\t")
                    .append("activity")
                    .append(".")
                    .append(field.getSimpleName())
                    .append(" = ")
                    .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
                    .append("Extra(")
                    .append("\"")
                    .append(field.getSimpleName())
                    .append("\"")
-                   .append(", (").append(lowerCaseFirstLetter(getClassAsString(field))).append(") -1);\n");
-          } else if (sameClass(field, char.class)) {
+                   .append(", (").append(lowerCaseFirstLetter(getClassNameAsString(field))).append(") -1);\n");
+          } else if (ofClass(field, char.class)) {
             builder.append("\t\t")
                    .append("activity")
                    .append(".")
                    .append(field.getSimpleName())
                    .append(" = ")
                    .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
                    .append("Extra(")
                    .append("\"")
                    .append(field.getSimpleName())
                    .append("\"")
                    .append(", 'm');\n");
-          } else if (sameClass(field, Integer.class) || sameClass(field, int.class)) {
+          } else if (ofClass(field, Integer.class) || ofClass(field, int.class)) {
             builder.append("\t\t")
                    .append("activity")
                    .append(".")
@@ -127,14 +127,14 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
                    .append(field.getSimpleName())
                    .append("\"")
                    .append(", -1);\n");
-          } else if (sameClass(field, Boolean.class) || sameClass(field, boolean.class)) {
+          } else if (ofClass(field, Boolean.class) || ofClass(field, boolean.class)) {
             builder.append("\t\t")
                    .append("activity")
                    .append(".")
                    .append(field.getSimpleName())
                    .append(" = ")
                    .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassAsString(field)))
+                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
                    .append("Extra(")
                    .append("\"")
                    .append(field.getSimpleName())
@@ -144,7 +144,7 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
             builder.append("\t\t")
                    .append("activity").append(".").append(field.getSimpleName())
                    .append(" = ")
-                   .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassAsString(field))).append("Extra(")
+                   .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassNameAsString(field))).append("Extra(")
                    .append("\"").append(field.getSimpleName()).append("\");\n");
           }
         }
@@ -172,12 +172,12 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     return true;
   }
 
-  private String getClassAsString(final Element field) {
+  private String getClassNameAsString(final Element field) {
     final String[] split = field.asType().toString().split("\\.");
-    return split[split.length-1];
+    return split[split.length-1].replace("[]", "Array");
   }
 
-  private boolean sameClass(Element element, Class clazz) {
+  private boolean ofClass(Element element, Class clazz) {
     return clazz.getName().equals(element.asType().toString());
   }
 
@@ -188,4 +188,5 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
   private String lowerCaseFirstLetter(final String input) {
     return input.substring(0, 1).toLowerCase().concat(input.substring(1));
   }
+
 }
