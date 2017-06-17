@@ -14,6 +14,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes("com.mhmt.navigationprocessor.processor.Required")
@@ -140,6 +141,17 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
                    .append(field.getSimpleName())
                    .append("\"")
                    .append(", false);\n");
+          } else if (isParcelable(field)) {
+            builder.append("\t\t")
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().getParcelableExtra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
+                   .append(");\n");
           } else {
             builder.append("\t\t")
                    .append("activity").append(".").append(field.getSimpleName())
@@ -189,4 +201,8 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     return input.substring(0, 1).toLowerCase().concat(input.substring(1));
   }
 
+  private boolean isParcelable(final Element field) {
+    TypeMirror serializable = processingEnv.getElementUtils().getTypeElement("android.os.Parcelable").asType();
+    return  processingEnv.getTypeUtils().isAssignable(field.asType(), serializable);
+  }
 }
