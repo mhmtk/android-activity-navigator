@@ -10,6 +10,15 @@ import com.mhmt.navigationprocessor.processor.Required;
 public class SecondActivity extends AppCompatActivity {
 
   @Required(bind = true) public int[] intArray;
+  @Required(bind = true) public byte[] byteArray;
+  @Required(bind = true) public boolean[] booleanArray;
+  @Required(bind = true) public short[] shortArray;
+  @Required(bind = true) public char[] charArray;
+  @Required(bind = true) public long[] longArray;
+  @Required(bind = true) public float[] floatArray;
+  @Required(bind = true) public double[] doubleArray;
+//  @Required(bind = true) public String[] stringArray;
+
   @Required(bind = true) public String string;
   @Required(bind = true) public Parcellabble parcellabble;
   @Required(bind = true) public Cerealizable cerealizable;
@@ -39,5 +48,6 @@ public class SecondActivity extends AppCompatActivity {
     Log.d("Navigator", "Before bind : " + string);
     Navigator.bind(this);
     Log.d("Navigator", "After bind: ".concat(string));
+//    new Intent().putExtra()
   }
 }

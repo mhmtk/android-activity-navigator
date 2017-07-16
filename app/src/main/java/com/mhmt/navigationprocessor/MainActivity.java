@@ -31,6 +31,13 @@ public class MainActivity extends AppCompatActivity {
       public void onClick(View view) {
         Navigator.startSecondActivity(MainActivity.this,
                                       new int[] {5},
+                                      new byte[] {3},
+                                      new boolean[] {true},
+                                      new short[] {0},
+                                      new char[] {'a'},
+                                      new long[] {3},
+                                      new float[] {3.3f},
+                                      new double[] {3.3},
                                       "str",
                                       new Parcellabble(),
                                       new Cerealizable(),
