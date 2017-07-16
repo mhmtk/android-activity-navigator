@@ -152,12 +152,23 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
                    .append(field.getSimpleName())
                    .append("\"")
                    .append(");\n");
-          } else {
+          } else if (ofClass(field, String.class) || ofClass(field, int[].class)) {
             builder.append("\t\t")
                    .append("activity").append(".").append(field.getSimpleName())
                    .append(" = ")
                    .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassNameAsString(field))).append("Extra(")
                    .append("\"").append(field.getSimpleName()).append("\");\n");
+          } else if (isSerializable(field)) {
+            builder.append("\t\t")
+                   .append("activity")
+                   .append(".")
+                   .append(field.getSimpleName())
+                   .append(" = ")
+                   .append("activity.getIntent().getSerializableExtra(")
+                   .append("\"")
+                   .append(field.getSimpleName())
+                   .append("\"")
+                   .append(");\n");
           }
         }
       }
@@ -203,6 +214,11 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
   private boolean isParcelable(final Element field) {
     TypeMirror serializable = processingEnv.getElementUtils().getTypeElement("android.os.Parcelable").asType();
+    return  processingEnv.getTypeUtils().isAssignable(field.asType(), serializable);
+  }
+
+  private boolean isSerializable(final Element field) {
+    TypeMirror serializable = processingEnv.getElementUtils().getTypeElement("java.io.Serializable").asType();
     return  processingEnv.getTypeUtils().isAssignable(field.asType(), serializable);
   }
 }

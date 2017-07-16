@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
                                       new int[] {5},
                                       "str",
                                       new Parcellabble(),
+                                      new Cerealizable(),
                                       5, 5,
                                       (byte) 2, Byte.valueOf((byte) 3),
                                       true, false,

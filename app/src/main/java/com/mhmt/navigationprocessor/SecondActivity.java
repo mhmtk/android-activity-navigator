@@ -12,6 +12,7 @@ public class SecondActivity extends AppCompatActivity {
   @Required(bind = true) public int[] intArray;
   @Required(bind = true) public String string;
   @Required(bind = true) public Parcellabble parcellabble;
+  @Required(bind = true) public Cerealizable cerealizable;
 
   @Required(bind = true) public int intId;
   @Required(bind = true) public Integer integer;
