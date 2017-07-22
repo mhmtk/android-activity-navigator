@@ -168,7 +168,7 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
                      .append(field.getSimpleName())
                      .append("\");\n");
             }
-          } else if (ofClass(field, String.class) || isBundle(field)) {
+          } else if (ofClass(field, String.class) || isBundle(field) || ofClass(field, CharSequence.class)) {
             builder.append("\t\t")
                    .append("activity").append(".").append(field.getSimpleName())
                    .append(" = ")
