@@ -1,7 +1,7 @@
 package com.mhmt.navigationprocessor;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,9 +20,23 @@ public class MainActivity extends AppCompatActivity {
     setSupportActionBar(toolbar);
 
 
-    Intent intent = new Intent();
+    final CharSequence charSequence = new CharSequence() {
+      @Override public int length() {
+        return 0;
+      }
 
-    intent.putExtra("bundle", new Bundle());
+      @Override public char charAt(final int index) {
+        return 0;
+      }
+
+      @Override public CharSequence subSequence(final int start, final int end) {
+        return null;
+      }
+
+      @NonNull @Override public String toString() {
+        return null;
+      }
+    };
 
     final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
     fab.setOnClickListener(new View.OnClickListener() {
@@ -38,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
                                       new float[] {3.3f},
                                       new double[] {3.3},
                                       new String[] {"YOLO"},
+                                      new CharSequence[] {charSequence},
                                       "str",
                                       new Parcellabble(),
                                       new Cerealizable(),
@@ -48,7 +63,10 @@ public class MainActivity extends AppCompatActivity {
                                       (long) 3, Long.valueOf((long) 3),
                                       (float) 3.5, Float.valueOf((float) 3.5),
                                       (short) 4, Short.valueOf((short) 4),
-                                      'c');
+                                      'c',
+                                      charSequence,
+                                      new Bundle(),
+                                      new Parcellabble[] {new Parcellabble()});
 
       }
     });

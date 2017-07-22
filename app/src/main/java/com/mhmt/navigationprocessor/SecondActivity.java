@@ -19,6 +19,7 @@ public class SecondActivity extends AppCompatActivity {
   @Required(bind = true) public double[] doubleArray;
 
   @Required(bind = true) public String[] stringArray;
+  @Required(bind = true) public CharSequence[] charSequenceArray;
 
   @Required(bind = true) public String string;
   @Required(bind = true) public Parcellabble parcellabble;
@@ -40,6 +41,10 @@ public class SecondActivity extends AppCompatActivity {
   @Required(bind = true) public Short shurt2;
   @Required(bind = true) public char chaar;
 
+  @Required(bind = true) public CharSequence charSequence;
+  @Required(bind = true) public Bundle bundle;
+  @Required(bind = true) public Parcellabble[] parcellabbleArray;
+
 
 
   @Override
@@ -49,6 +54,5 @@ public class SecondActivity extends AppCompatActivity {
     Log.d("Navigator", "Before bind : " + string);
     Navigator.bind(this);
     Log.d("Navigator", "After bind: ".concat(string));
-//    new Intent().putExtra()
   }
 }
