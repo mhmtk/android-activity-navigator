@@ -10,8 +10,20 @@ import com.mhmt.navigationprocessor.processor.Required;
 public class SecondActivity extends AppCompatActivity {
 
   @Required(bind = true) public int[] intArray;
+  @Required(bind = true) public byte[] byteArray;
+  @Required(bind = true) public boolean[] booleanArray;
+  @Required(bind = true) public short[] shortArray;
+  @Required(bind = true) public char[] charArray;
+  @Required(bind = true) public long[] longArray;
+  @Required(bind = true) public float[] floatArray;
+  @Required(bind = true) public double[] doubleArray;
+
+  @Required(bind = true) public String[] stringArray;
+  @Required(bind = true) public CharSequence[] charSequenceArray;
+
   @Required(bind = true) public String string;
   @Required(bind = true) public Parcellabble parcellabble;
+  @Required(bind = true) public Cerealizable cerealizable;
 
   @Required(bind = true) public int intId;
   @Required(bind = true) public Integer integer;
@@ -28,6 +40,10 @@ public class SecondActivity extends AppCompatActivity {
   @Required(bind = true) public short shurt;
   @Required(bind = true) public Short shurt2;
   @Required(bind = true) public char chaar;
+
+  @Required(bind = true) public CharSequence charSequence;
+  @Required(bind = true) public Bundle bundle;
+  @Required(bind = true) public Parcellabble[] parcellabbleArray;
 
 
 
