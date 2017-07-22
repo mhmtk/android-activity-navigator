@@ -152,11 +152,7 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
                    .append(field.getSimpleName())
                    .append("\"")
                    .append(");\n");
-          } else if (ofClass(field, String.class) || ofArrayClass(field, int[].class)
-                     || ofArrayClass(field, boolean[].class) || ofArrayClass(field, short[].class)
-                     || ofArrayClass(field, byte[].class) || ofArrayClass(field, char[].class)
-                     || ofArrayClass(field, long[].class) || ofArrayClass(field, float[].class)
-                     || ofArrayClass(field, double[].class)) {
+          } else if (isArray(field) || ofClass(field, String.class)) {
             builder.append("\t\t")
                    .append("activity").append(".").append(field.getSimpleName())
                    .append(" = ")
@@ -205,12 +201,12 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     return split[split.length-1].replace("[]", "Array");
   }
 
-  private boolean ofClass(Element element, Class clazz) {
-    return clazz.getName().equals(element.asType().toString());
+  private boolean isArray(final Element element) {
+    return element.asType().getKind().toString().equals("ARRAY");
   }
 
-  private boolean ofArrayClass(Element element, Class clazz) {
-    return clazz.getSimpleName().equals(element.asType().toString());
+  private boolean ofClass(Element element, Class clazz) {
+    return clazz.getName().equals(element.asType().toString());
   }
 
   private String capitalizeFirstLetter(final String input) {

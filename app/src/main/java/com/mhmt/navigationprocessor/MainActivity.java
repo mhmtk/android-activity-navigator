@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
 
     intent.putExtra("bundle", new Bundle());
 
-
     final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
     fab.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -38,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
                                       new long[] {3},
                                       new float[] {3.3f},
                                       new double[] {3.3},
+                                      new String[] {"YOLO"},
                                       "str",
                                       new Parcellabble(),
                                       new Cerealizable(),

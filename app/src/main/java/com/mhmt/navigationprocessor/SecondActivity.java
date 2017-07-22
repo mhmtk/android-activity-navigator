@@ -17,7 +17,8 @@ public class SecondActivity extends AppCompatActivity {
   @Required(bind = true) public long[] longArray;
   @Required(bind = true) public float[] floatArray;
   @Required(bind = true) public double[] doubleArray;
-//  @Required(bind = true) public String[] stringArray;
+
+  @Required(bind = true) public String[] stringArray;
 
   @Required(bind = true) public String string;
   @Required(bind = true) public Parcellabble parcellabble;
