@@ -1,7 +1,13 @@
 package com.mhmt.navigationprocessor.processor;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
+
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,15 +19,18 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.tools.JavaFileObject;
 
 @SupportedAnnotationTypes("com.mhmt.navigationprocessor.processor.Required")
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 public class NavigationAnnotationProcessor extends AbstractProcessor {
+
+  private static final ClassName intentClass = ClassName.get("android.content", "Intent");
+  private static final ClassName contextClass = ClassName.get("android.content", "Context");
 
   @Override public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
@@ -37,185 +46,163 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
       }
     }
 
-    // Add package and imports
-    StringBuilder builder = new StringBuilder()
-                                .append("package com.mhmt.navigationprocessor.generated;\n")
-                                .append("import android.content.Context;\n")
-                                .append("import android.content.Intent;\n");
-
-    for (Element clazz : classVariableMap.keySet()) {
-      builder.append("import com.mhmt.navigationprocessor.")
-             .append(clazz.getSimpleName())
-             .append(";\n\n");
-    }
-
-    builder.append("public class Navigator {\n\n"); // open class
+    TypeSpec.Builder navigatorClassBuilder = TypeSpec.classBuilder("Navigator")
+            .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
     for (Element clazz : classVariableMap.keySet()) { //add a start method for each activity
-      builder.append("\tpublic static void start").append(clazz.getSimpleName().toString()).append("(final Context context");
-
-      StringBuilder intentBuilder = new StringBuilder();
-      intentBuilder.append("\t\tIntent intent = new Intent(context, ").append(clazz.getSimpleName()).append(".class);\n");
+      MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start".concat(clazz.getSimpleName().toString()))
+              .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+              .returns(void.class)
+              .addParameter(contextClass, "context")
+              .addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, clazz.asType());
       for (Element field : classVariableMap.get(clazz)) {
-        builder.append(", ").append(field.asType().toString()).append(" ").append(field.getSimpleName());
-        intentBuilder.append("\t\tintent.putExtra(")
-                     .append("\"").append(field.getSimpleName()).append("\"").append(", ") // Extra name
-                     .append(field.getSimpleName()) // Extra value
-                     .append(");\n");
+        methodBuilder
+                .addParameter(ParameterizedTypeName.get(field.asType()), field.getSimpleName().toString())
+                .addStatement("intent.putExtra($S, $L)", field.getSimpleName(), field.getSimpleName());
       }
-      intentBuilder.append("\t\tcontext.startActivity(intent);\n");
+      methodBuilder.addStatement("context.startActivity(intent)");
 
-      builder.append(") {\n") // close method signature
-             .append(intentBuilder.toString()) //add method body
-             .append("\t}\n\n"); //close method
+      navigatorClassBuilder.addMethod(methodBuilder.build());
+
     }
 
-    for (Element clazz: classVariableMap.keySet()) {
-      builder.append("\t public static void bind(final ")
-             .append(clazz.getSimpleName())
-             .append(" activity) {\n"); // open method
-
-      for (Element field : classVariableMap.get(clazz)) {
-        if (field.getAnnotation(Required.class).bind()) {
-          if (ofClass(field, Double.class) || ofClass(field, double.class)
-              || ofClass(field, Long.class) || ofClass(field, long.class)
-              || ofClass(field, Float.class) || ofClass(field, float.class)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-                   .append("Extra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(", -1);\n");
-          } else if (ofClass(field, Byte.class) || ofClass(field, byte.class)
-                     || ofClass(field, Short.class) || ofClass(field, short.class)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-                   .append("Extra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(", (").append(lowerCaseFirstLetter(getClassNameAsString(field))).append(") -1);\n");
-          } else if (ofClass(field, char.class)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-                   .append("Extra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(", 'm');\n");
-          } else if (ofClass(field, Integer.class) || ofClass(field, int.class)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().getIntExtra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(", -1);\n");
-          } else if (ofClass(field, Boolean.class) || ofClass(field, boolean.class)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().get")
-                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-                   .append("Extra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(", false);\n");
-          } else if (isArray(field)) {
-            if (isParcelableArray(field)) {
-              builder.append("\t\t")
-                     .append("activity")
-                     .append(".")
-                     .append(field.getSimpleName())
-                     .append(" = (")
-                     .append(field.asType().toString())
-                     .append(") activity.getIntent().getParcelableArrayExtra(")
-                     .append("\"")
-                     .append(field.getSimpleName())
-                     .append("\");\n");
-            } else {
-              builder.append("\t\t")
-                     .append("activity")
-                     .append(".")
-                     .append(field.getSimpleName())
-                     .append(" = ")
-                     .append("activity.getIntent().get")
-                     .append(capitalizeFirstLetter(getClassNameAsString(field)))
-                     .append("Extra(")
-                     .append("\"")
-                     .append(field.getSimpleName())
-                     .append("\");\n");
-            }
-          } else if (ofClass(field, String.class) || isBundle(field) || ofClass(field, CharSequence.class)) {
-            builder.append("\t\t")
-                   .append("activity").append(".").append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassNameAsString(field))).append("Extra(")
-                   .append("\"").append(field.getSimpleName()).append("\");\n");
-          } else if (isParcelable(field)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = ")
-                   .append("activity.getIntent().getParcelableExtra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(");\n");
-          } else if (isSerializable(field)) {
-            builder.append("\t\t")
-                   .append("activity")
-                   .append(".")
-                   .append(field.getSimpleName())
-                   .append(" = (")
-                   .append(field.asType().toString())
-                   .append(") activity.getIntent().getSerializableExtra(")
-                   .append("\"")
-                   .append(field.getSimpleName())
-                   .append("\"")
-                   .append(");\n");
-          }
-        }
-      }
-      builder.append("\t}\n\n"); //close method
-    }
-    builder.append("}\n"); // close class
-
-
-
-    try { // write the file
-      JavaFileObject
-          source = processingEnv.getFiler().createSourceFile("com.mhmt.navigationprocessor.generated.Navigator");
-      Writer writer = source.openWriter();
-      writer.write(builder.toString());
-      writer.flush();
-      writer.close();
+//    for (Element clazz: classVariableMap.keySet()) {
+//      builder.append("\t public static void bind(final ")
+//             .append(clazz.getSimpleName())
+//             .append(" activity) {\n"); // open method
+//
+//      for (Element field : classVariableMap.get(clazz)) {
+//        if (field.getAnnotation(Required.class).bind()) {
+//          if (ofClass(field, Double.class) || ofClass(field, double.class)
+//              || ofClass(field, Long.class) || ofClass(field, long.class)
+//              || ofClass(field, Float.class) || ofClass(field, float.class)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().get")
+//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
+//                   .append("Extra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(", -1);\n");
+//          } else if (ofClass(field, Byte.class) || ofClass(field, byte.class)
+//                     || ofClass(field, Short.class) || ofClass(field, short.class)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().get")
+//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
+//                   .append("Extra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(", (").append(lowerCaseFirstLetter(getClassNameAsString(field))).append(") -1);\n");
+//          } else if (ofClass(field, char.class)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().get")
+//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
+//                   .append("Extra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(", 'm');\n");
+//          } else if (ofClass(field, Integer.class) || ofClass(field, int.class)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().getIntExtra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(", -1);\n");
+//          } else if (ofClass(field, Boolean.class) || ofClass(field, boolean.class)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().get")
+//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
+//                   .append("Extra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(", false);\n");
+//          } else if (isArray(field)) {
+//            if (isParcelableArray(field)) {
+//              builder.append("\t\t")
+//                     .append("activity")
+//                     .append(".")
+//                     .append(field.getSimpleName())
+//                     .append(" = (")
+//                     .append(field.asType().toString())
+//                     .append(") activity.getIntent().getParcelableArrayExtra(")
+//                     .append("\"")
+//                     .append(field.getSimpleName())
+//                     .append("\");\n");
+//            } else {
+//              builder.append("\t\t")
+//                     .append("activity")
+//                     .append(".")
+//                     .append(field.getSimpleName())
+//                     .append(" = ")
+//                     .append("activity.getIntent().get")
+//                     .append(capitalizeFirstLetter(getClassNameAsString(field)))
+//                     .append("Extra(")
+//                     .append("\"")
+//                     .append(field.getSimpleName())
+//                     .append("\");\n");
+//            }
+//          } else if (ofClass(field, String.class) || isBundle(field) || ofClass(field, CharSequence.class)) {
+//            builder.append("\t\t")
+//                   .append("activity").append(".").append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassNameAsString(field))).append("Extra(")
+//                   .append("\"").append(field.getSimpleName()).append("\");\n");
+//          } else if (isParcelable(field)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = ")
+//                   .append("activity.getIntent().getParcelableExtra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(");\n");
+//          } else if (isSerializable(field)) {
+//            builder.append("\t\t")
+//                   .append("activity")
+//                   .append(".")
+//                   .append(field.getSimpleName())
+//                   .append(" = (")
+//                   .append(field.asType().toString())
+//                   .append(") activity.getIntent().getSerializableExtra(")
+//                   .append("\"")
+//                   .append(field.getSimpleName())
+//                   .append("\"")
+//                   .append(");\n");
+//          }
+//        }
+//      }
+//      builder.append("\t}\n\n"); //close method
+//    }
+    JavaFile javaFile = JavaFile.builder("com.mhmt.navigationprocessor.generated", navigatorClassBuilder.build())
+            .build();
+    try {
+      javaFile.writeTo(processingEnv.getFiler());
     } catch (IOException e) {
-      // Note: calling e.printStackTrace() will print IO errors
-      // that occur from the file already existing after its first run, this is normal
       e.printStackTrace();
     }
 
