@@ -1,5 +1,6 @@
 package com.mhmt.navigationprocessor.processor;
 
+import com.mhmt.navigationprocessor.processor.error.IncompatibleModifierError;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -54,9 +55,12 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
       for (Element annotatedField : classToFieldListMap.get(clazz)) {
         startMethodBuilder
-                .addParameter(ParameterizedTypeName.get(annotatedField.asType()), annotatedField.getSimpleName().toString())
+                .addParameter(ParameterizedTypeName.get(annotatedField.asType()), annotatedField.getSimpleName().toString(), Modifier.FINAL)
                 .addStatement("intent.putExtra($S, $L)", annotatedField.getSimpleName(), annotatedField.getSimpleName());
         if (annotatedField.getAnnotation(Required.class).bind()) {
+          if (!annotatedField.getModifiers().contains(Modifier.PUBLIC)) {
+            throw new IncompatibleModifierError(clazz.getSimpleName().toString(), annotatedField.getSimpleName().toString());
+          }
           addBindStatement(bindMethodBuilder, annotatedField);
         }
       }
