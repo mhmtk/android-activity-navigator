@@ -40,154 +40,31 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
     // Go through the activities
     MethodSpec.Builder startMethodBuilder;
+    MethodSpec.Builder bindMethodBuilder;
     for (Element clazz : classToFieldListMap.keySet()) {
       startMethodBuilder = MethodSpec.methodBuilder("start".concat(clazz.getSimpleName().toString()))
               .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
               .returns(void.class)
-              .addParameter(contextClass, "context")
+              .addParameter(contextClass, "context", Modifier.FINAL)
               .addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, clazz.asType());
+      bindMethodBuilder = MethodSpec.methodBuilder("bind")
+              .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+              .returns(void.class)
+              .addParameter(ParameterizedTypeName.get(clazz.asType()), "activity", Modifier.FINAL);
 
       for (Element annotatedField : classToFieldListMap.get(clazz)) {
         startMethodBuilder
                 .addParameter(ParameterizedTypeName.get(annotatedField.asType()), annotatedField.getSimpleName().toString())
                 .addStatement("intent.putExtra($S, $L)", annotatedField.getSimpleName(), annotatedField.getSimpleName());
+        if (annotatedField.getAnnotation(Required.class).bind()) {
+          addBindStatement(bindMethodBuilder, annotatedField);
+        }
       }
       startMethodBuilder.addStatement("context.startActivity(intent)");
       navigatorClassBuilder.addMethod(startMethodBuilder.build());
+      navigatorClassBuilder.addMethod(bindMethodBuilder.build());
     }
 
-//    for (Element clazz: classVariableMap.keySet()) {
-//      builder.append("\t public static void bind(final ")
-//             .append(clazz.getSimpleName())
-//             .append(" activity) {\n"); // open method
-//
-//      for (Element field : classVariableMap.get(clazz)) {
-//        if (field.getAnnotation(Required.class).bind()) {
-//          if (ofClass(field, Double.class) || ofClass(field, double.class)
-//              || ofClass(field, Long.class) || ofClass(field, long.class)
-//              || ofClass(field, Float.class) || ofClass(field, float.class)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().get")
-//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-//                   .append("Extra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(", -1);\n");
-//          } else if (ofClass(field, Byte.class) || ofClass(field, byte.class)
-//                     || ofClass(field, Short.class) || ofClass(field, short.class)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().get")
-//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-//                   .append("Extra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(", (").append(lowerCaseFirstLetter(getClassNameAsString(field))).append(") -1);\n");
-//          } else if (ofClass(field, char.class)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().get")
-//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-//                   .append("Extra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(", 'm');\n");
-//          } else if (ofClass(field, Integer.class) || ofClass(field, int.class)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().getIntExtra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(", -1);\n");
-//          } else if (ofClass(field, Boolean.class) || ofClass(field, boolean.class)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().get")
-//                   .append(capitalizeFirstLetter(getClassNameAsString(field)))
-//                   .append("Extra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(", false);\n");
-//          } else if (isArray(field)) {
-//            if (isParcelableArray(field)) {
-//              builder.append("\t\t")
-//                     .append("activity")
-//                     .append(".")
-//                     .append(field.getSimpleName())
-//                     .append(" = (")
-//                     .append(field.asType().toString())
-//                     .append(") activity.getIntent().getParcelableArrayExtra(")
-//                     .append("\"")
-//                     .append(field.getSimpleName())
-//                     .append("\");\n");
-//            } else {
-//              builder.append("\t\t")
-//                     .append("activity")
-//                     .append(".")
-//                     .append(field.getSimpleName())
-//                     .append(" = ")
-//                     .append("activity.getIntent().get")
-//                     .append(capitalizeFirstLetter(getClassNameAsString(field)))
-//                     .append("Extra(")
-//                     .append("\"")
-//                     .append(field.getSimpleName())
-//                     .append("\");\n");
-//            }
-//          } else if (ofClass(field, String.class) || isBundle(field) || ofClass(field, CharSequence.class)) {
-//            builder.append("\t\t")
-//                   .append("activity").append(".").append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().get").append(capitalizeFirstLetter(getClassNameAsString(field))).append("Extra(")
-//                   .append("\"").append(field.getSimpleName()).append("\");\n");
-//          } else if (isParcelable(field)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = ")
-//                   .append("activity.getIntent().getParcelableExtra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(");\n");
-//          } else if (isSerializable(field)) {
-//            builder.append("\t\t")
-//                   .append("activity")
-//                   .append(".")
-//                   .append(field.getSimpleName())
-//                   .append(" = (")
-//                   .append(field.asType().toString())
-//                   .append(") activity.getIntent().getSerializableExtra(")
-//                   .append("\"")
-//                   .append(field.getSimpleName())
-//                   .append("\"")
-//                   .append(");\n");
-//          }
-//        }
-//      }
-//      builder.append("\t}\n\n"); //close method
-//    }
     JavaFile javaFile = JavaFile.builder("com.mhmt.navigationprocessor.generated", navigatorClassBuilder.build())
             .build();
     try {
@@ -197,6 +74,63 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     }
 
     return true;
+  }
+
+  private void addBindStatement(MethodSpec.Builder bindMethodBuilder, Element field) {
+    if (ofClass(field, Double.class) || ofClass(field, double.class)
+            || ofClass(field, Long.class) || ofClass(field, long.class)
+            || ofClass(field, Float.class) || ofClass(field, float.class)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().get$LExtra($S, -1)",
+              field.getSimpleName(),
+              capitalizeFirstLetter(getClassNameAsString(field)),
+              field.getSimpleName());
+    } else if (ofClass(field, Byte.class) || ofClass(field, byte.class)
+            || ofClass(field, Short.class) || ofClass(field, short.class)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().get$LExtra($S, ($L) -1)",
+              field.getSimpleName(),
+              capitalizeFirstLetter(getClassNameAsString(field)),
+              field.getSimpleName(),
+              lowerCaseFirstLetter(getClassNameAsString(field)));
+    } else if (ofClass(field, char.class)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().get$LExtra($S, 'm')",
+              field.getSimpleName(),
+              capitalizeFirstLetter(getClassNameAsString(field)),
+              field.getSimpleName());
+    } else if (ofClass(field, Integer.class) || ofClass(field, int.class)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().getIntExtra($S, -1)",
+              field.getSimpleName(),
+              field.getSimpleName());
+    } else if (ofClass(field, Boolean.class) || ofClass(field, boolean.class)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().getBooleanExtra($S, false)",
+              field.getSimpleName(),
+              field.getSimpleName());
+    } else if (isArray(field)) {
+      if (isParcelableArray(field)) {
+        bindMethodBuilder.addStatement("activity.$L = ($T) activity.getIntent().getParcelableArrayExtra($S)",
+                field.getSimpleName(),
+                ParameterizedTypeName.get(field.asType()),
+                field.getSimpleName());
+      } else {
+        bindMethodBuilder.addStatement("activity.$L = activity.getIntent().get$LExtra($S)",
+                field.getSimpleName(),
+                capitalizeFirstLetter(getClassNameAsString(field)),
+                field.getSimpleName());
+      }
+    } else if (ofClass(field, String.class) || isBundle(field) || ofClass(field, CharSequence.class)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().get$LExtra($S)",
+              field.getSimpleName(),
+              capitalizeFirstLetter(getClassNameAsString(field)),
+              field.getSimpleName());
+    } else if (isParcelable(field)) {
+      bindMethodBuilder.addStatement("activity.$L = activity.getIntent().getParcelableExtra($S)",
+              field.getSimpleName(),
+              field.getSimpleName());
+    } else if (isSerializable(field)) {
+      bindMethodBuilder.addStatement("activity.$L = ($T) activity.getIntent().getSerializableExtra($S)",
+              field.getSimpleName(),
+              ParameterizedTypeName.get(field.asType()),
+              field.getSimpleName());
+    }
   }
 
   private HashMap<Element, List<Element>> populateClassToFieldListMap(final RoundEnvironment roundEnv) {
