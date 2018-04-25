@@ -3,7 +3,6 @@ package com.mhmt.navigationprocessor.processor;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -34,36 +33,27 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
 
   @Override public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
 
-    HashMap<Element, List<Element>> classVariableMap = new HashMap<>();
-    for (Element rootElement : roundEnv.getElementsAnnotatedWith(Required.class)) {
-      Element clazz = rootElement.getEnclosingElement();
-      if (!classVariableMap.containsKey(clazz)) {
-        ArrayList<Element> elementList = new ArrayList<>();
-        elementList.add(rootElement);
-        classVariableMap.put(clazz, elementList);
-      } else {
-        classVariableMap.get(clazz).add(rootElement);
-      }
-    }
+    HashMap<Element, List<Element>> classToFieldListMap = populateClassToFieldListMap(roundEnv);
 
     TypeSpec.Builder navigatorClassBuilder = TypeSpec.classBuilder("Navigator")
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
 
-    for (Element clazz : classVariableMap.keySet()) { //add a start method for each activity
-      MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder("start".concat(clazz.getSimpleName().toString()))
+    // Go through the activities
+    MethodSpec.Builder startMethodBuilder;
+    for (Element clazz : classToFieldListMap.keySet()) {
+      startMethodBuilder = MethodSpec.methodBuilder("start".concat(clazz.getSimpleName().toString()))
               .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
               .returns(void.class)
               .addParameter(contextClass, "context")
               .addStatement("$T intent = new $T(context, $T.class)", intentClass, intentClass, clazz.asType());
-      for (Element field : classVariableMap.get(clazz)) {
-        methodBuilder
-                .addParameter(ParameterizedTypeName.get(field.asType()), field.getSimpleName().toString())
-                .addStatement("intent.putExtra($S, $L)", field.getSimpleName(), field.getSimpleName());
+
+      for (Element annotatedField : classToFieldListMap.get(clazz)) {
+        startMethodBuilder
+                .addParameter(ParameterizedTypeName.get(annotatedField.asType()), annotatedField.getSimpleName().toString())
+                .addStatement("intent.putExtra($S, $L)", annotatedField.getSimpleName(), annotatedField.getSimpleName());
       }
-      methodBuilder.addStatement("context.startActivity(intent)");
-
-      navigatorClassBuilder.addMethod(methodBuilder.build());
-
+      startMethodBuilder.addStatement("context.startActivity(intent)");
+      navigatorClassBuilder.addMethod(startMethodBuilder.build());
     }
 
 //    for (Element clazz: classVariableMap.keySet()) {
@@ -207,6 +197,23 @@ public class NavigationAnnotationProcessor extends AbstractProcessor {
     }
 
     return true;
+  }
+
+  private HashMap<Element, List<Element>> populateClassToFieldListMap(final RoundEnvironment roundEnv) {
+    HashMap<Element, List<Element>> classToVariableListMap = new HashMap<>();
+    Element clazz;
+    ArrayList<Element> elementList;
+    for (Element rootElement : roundEnv.getElementsAnnotatedWith(Required.class)) {
+      clazz = rootElement.getEnclosingElement();
+      if (!classToVariableListMap.containsKey(clazz)) {
+        elementList = new ArrayList<>();
+        elementList.add(rootElement);
+        classToVariableListMap.put(clazz, elementList);
+      } else {
+        classToVariableListMap.get(clazz).add(rootElement);
+      }
+    }
+    return classToVariableListMap;
   }
 
   private boolean isParcelableArray(final Element field) {
