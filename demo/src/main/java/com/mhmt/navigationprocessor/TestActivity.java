@@ -2,12 +2,13 @@ package com.mhmt.navigationprocessor;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
+import com.mhmt.navigationprocessor.dummy.Cerealizable;
+import com.mhmt.navigationprocessor.dummy.Parcellabble;
 import com.mhmt.navigationprocessor.generated.Navigator;
 import com.mhmt.navigationprocessor.processor.Required;
 
-public class SecondActivity extends AppCompatActivity {
+public class TestActivity extends AppCompatActivity {
 
   @Required public int[] intArray;
   @Required public byte[] byteArray;
@@ -50,9 +51,7 @@ public class SecondActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    setContentView(R.layout.activity_second);
-    Log.d("Navigator", "Before bind : " + string);
+    setContentView(R.layout.activity_test);
     Navigator.bind(this);
-    Log.d("Navigator", "After bind: ".concat(string));
   }
 }

@@ -1,4 +1,4 @@
-package com.mhmt.navigationprocessor;
+package com.mhmt.navigationprocessor.dummy;
 
 import java.io.Serializable;
 
