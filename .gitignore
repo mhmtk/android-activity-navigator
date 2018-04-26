@@ -45,6 +45,7 @@ captures/
 *.iml
 .idea/caches/
 .idea/codeStyles/
+.idea/runConfigurations.xml
 
 # Keystore files
 *.jks
