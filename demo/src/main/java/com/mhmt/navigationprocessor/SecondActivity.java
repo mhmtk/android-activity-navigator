@@ -9,41 +9,41 @@ import com.mhmt.navigationprocessor.processor.Required;
 
 public class SecondActivity extends AppCompatActivity {
 
-  @Required(bind = true) public int[] intArray;
-  @Required(bind = true) public byte[] byteArray;
-  @Required(bind = true) public boolean[] booleanArray;
-  @Required(bind = true) public short[] shortArray;
-  @Required(bind = true) public char[] charArray;
-  @Required(bind = true) public long[] longArray;
-  @Required(bind = true) public float[] floatArray;
-  @Required(bind = true) public double[] doubleArray;
+  @Required public int[] intArray;
+  @Required public byte[] byteArray;
+  @Required public boolean[] booleanArray;
+  @Required public short[] shortArray;
+  @Required public char[] charArray;
+  @Required public long[] longArray;
+  @Required public float[] floatArray;
+  @Required public double[] doubleArray;
 
-  @Required(bind = true) public String[] stringArray;
-  @Required(bind = true) public CharSequence[] charSequenceArray;
+  @Required public String[] stringArray;
+  @Required public CharSequence[] charSequenceArray;
 
-  @Required(bind = true) public String string;
-  @Required(bind = true) public Parcellabble parcellabble;
-  @Required(bind = true) public Cerealizable cerealizable;
+  @Required public String string;
+  @Required public Parcellabble parcellabble;
+  @Required public Cerealizable cerealizable;
 
-  @Required(bind = true) public int intId;
-  @Required(bind = true) public Integer integer;
-  @Required(bind = true) public byte bite;
-  @Required(bind = true) public Byte bite2;
-  @Required(bind = true) public boolean booleen;
-  @Required(bind = true) public Boolean booleen2;
-  @Required(bind = true) public double duuble;
-  @Required(bind = true) public Double duuble2;
-  @Required(bind = true) public long lung;
-  @Required(bind = true) public Long lung2;
-  @Required(bind = true) public float flote;
-  @Required(bind = true) public Float flote2;
-  @Required(bind = true) public short shurt;
-  @Required(bind = true) public Short shurt2;
-  @Required(bind = true) public char chaar;
+  @Required public int intId;
+  @Required public Integer integer;
+  @Required public byte bite;
+  @Required public Byte bite2;
+  @Required public boolean booleen;
+  @Required public Boolean booleen2;
+  @Required public double duuble;
+  @Required public Double duuble2;
+  @Required public long lung;
+  @Required public Long lung2;
+  @Required public float flote;
+  @Required public Float flote2;
+  @Required public short shurt;
+  @Required public Short shurt2;
+  @Required public char chaar;
 
-  @Required(bind = true) public CharSequence charSequence;
-  @Required(bind = true) public Bundle bundle;
-  @Required(bind = true) public Parcellabble[] parcellabbleArray;
+  @Required public CharSequence charSequence;
+  @Required public Bundle bundle;
+  @Required public Parcellabble[] parcellabbleArray;
 
 
 
